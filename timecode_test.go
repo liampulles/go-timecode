@@ -84,41 +84,93 @@ func TestTimecode_String(t *testing.T) {
 	assert.Equal(t, "01:02:03.004", actual)
 }
 
+func TestTimecode_WithHours(t *testing.T) {
+	// Setup fixture
+	sut := timecode.Hour + (2 * timecode.Minute) + (3 * timecode.Second) + (4 * timecode.Millisecond)
+
+	// Exercise SUT
+	actual := sut.WithHours(9)
+
+	// Verify result
+	assert.Equal(t, "09:02:03.004", actual.FormatDot())
+}
+
+func TestTimecode_WithMinutes(t *testing.T) {
+	// Setup fixture
+	sut := timecode.Hour + (2 * timecode.Minute) + (3 * timecode.Second) + (4 * timecode.Millisecond)
+
+	// Exercise SUT
+	actual := sut.WithMinutes(9)
+
+	// Verify result
+	assert.Equal(t, "01:09:03.004", actual.FormatDot())
+}
+
+func TestTimecode_WithSeconds(t *testing.T) {
+	// Setup fixture
+	sut := timecode.Hour + (2 * timecode.Minute) + (3 * timecode.Second) + (4 * timecode.Millisecond)
+
+	// Exercise SUT
+	actual := sut.WithSeconds(9)
+
+	// Verify result
+	assert.Equal(t, "01:02:09.004", actual.FormatDot())
+}
+
+func TestTimecode_WithMilli(t *testing.T) {
+	// Setup fixture
+	sut := timecode.Hour + (2 * timecode.Minute) + (3 * timecode.Second) + (4 * timecode.Millisecond)
+
+	// Exercise SUT
+	actual := sut.WithMilli(9)
+
+	// Verify result
+	assert.Equal(t, "01:02:03.009", actual.FormatDot())
+}
+
 func TestFromParams(t *testing.T) {
 	// Setup expectations
 	var tests = []struct {
-		hour        int64
-		minute      int64
-		second      int64
-		Millisecond int64
+		negative    bool
+		hour        uint64
+		minute      uint64
+		second      uint64
+		Millisecond uint64
 		expected    timecode.Timecode
 	}{
 		{
+			false,
 			0, 0, 0, 0,
 			timecode.Zero,
 		},
 		{
+			false,
 			0, 0, 0, 1,
 			timecode.Millisecond,
 		},
 		{
+			false,
 			0, 0, 1, 0,
 			timecode.Second,
 		},
 		{
+			false,
 			0, 1, 0, 0,
 			timecode.Minute,
 		},
 		{
+			false,
 			1, 0, 0, 0,
 			timecode.Hour,
 		},
 		{
+			false,
 			1, 2, 3, 456,
 			timecode.Timecode(3723456),
 		},
 		{
-			-1, -2, -3, -456,
+			true,
+			1, 2, 3, 456,
 			timecode.Timecode(-3723456),
 		},
 	}
@@ -126,7 +178,7 @@ func TestFromParams(t *testing.T) {
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("[%d]", i), func(t *testing.T) {
 			// Exercise SUT
-			actual := timecode.FromParams(test.hour, test.minute, test.second, test.Millisecond)
+			actual := timecode.FromParams(test.negative, test.hour, test.minute, test.second, test.Millisecond)
 
 			// Verify result
 			assert.Equal(t, test.expected, actual)

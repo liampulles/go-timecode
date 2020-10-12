@@ -17,6 +17,53 @@
   </a>
 </p>
 
+## Usage examples
+
+### Parse timecodes
+
+```go
+import "github.com/liampulles/go-timecode"
+
+t, err := timecode.Parse("01:02:03.456")
+// or...
+timecode.Parse("01:02:03,456")
+timecode.Parse("-01:02:03.456")
+timecode.Parse("01:02:03")
+```
+
+### Perform arithmetic on timecodes
+
+```go
+import "github.com/liampulles/go-timecode"
+
+t, _ := timecode.Parse("01:02:03.456")
+t2 := t + timecode.Hour
+// t2 is 02:02:03.456
+
+// Apply PAL slowdown
+t3 := Timecode(t2 * (23.976/25.0))
+```
+
+### Format timecodes
+
+```go
+import "github.com/liampulles/go-timecode"
+
+t, _ := timecode.Parse("01:02:03.456")
+
+str := t.FormatDot()
+// str is 01:02:03.456
+
+str2 := t.FormatComma()
+// str2 is 01:02:03,456
+
+str3 := t.Format(true, ";")
+// str3 is 01:02:03;456
+
+str4 := t.Format(false, "")
+// str4 is 01:02:03
+```
+
 ## Contributing
 
 Please submit an issue with your proposal.
