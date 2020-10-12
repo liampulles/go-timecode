@@ -6,7 +6,11 @@ import (
 	"strconv"
 )
 
-var timecodeRegex = regexp.MustCompile(`([-])?([01]\d|2[0123]):([012345]\d):([012345]\d)(?:[.,](\d{3}))?`)
+// Regex can be used to validate timecodes and capture the sign (optional)
+// hours, minutes, seconds, and milliseconds (optional) groups. Digits are
+// properly checked to fall under a 24 hour clock, and the millisecond seperator
+// may either be a dot or a comma.
+var Regex = regexp.MustCompile(`([-])?([01]\d|2[0123]):([012345]\d):([012345]\d)(?:[.,](\d{3}))?`)
 
 // Some basic Timecode units
 const (
@@ -18,14 +22,18 @@ const (
 )
 
 // Timecode defines a timecode that would typically be used to denote a duration
-// or position in media, e.g. for a subtitle or audio track. It has millisecond
-// resolution, and may be negative.
+// or position in media, e.g. for a subtitle or audio track.
+//
+// Timecode has millisecond resolution, and may be negative.
+//
+// Timecodes may be directly added/subtracted, and multiplied by factors (as
+// long as the result is cast back to Timecode)
 type Timecode int64
 
 // Check we implement the interface
 var _ fmt.Stringer = Timecode(0)
 
-// HourMinuteSecondMilli returns the elements of a timecode
+// HourMinuteSecondMilli returns the constituent elements of a timecode
 func (t Timecode) HourMinuteSecondMilli() (int64, int64, int64, int64) {
 	i := int64(t)
 
@@ -56,7 +64,8 @@ func (t Timecode) Format(withMilli bool, milliSeperator string) string {
 
 	var result string
 	if withMilli {
-		result = fmt.Sprintf("%02d:%02d:%02d%s%03d", hour, minute, second, milliSeperator, milli)
+		result = fmt.Sprintf("%02d:%02d:%02d%s%03d",
+			hour, minute, second, milliSeperator, milli)
 	} else {
 		result = fmt.Sprintf("%02d:%02d:%02d", hour, minute, second)
 	}
@@ -102,7 +111,7 @@ func FromParams(hour, minute, second, milli int64) Timecode {
 // "01:02:03"
 // "crouching.tiger.01:02:03.456.hidden.timecode"
 func Parse(str string) (Timecode, error) {
-	m := timecodeRegex.FindStringSubmatch(str)
+	m := Regex.FindStringSubmatch(str)
 	if len(m) == 0 {
 		return Timecode(0), fmt.Errorf("not a timecode")
 	}
